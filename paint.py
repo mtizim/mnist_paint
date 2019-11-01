@@ -25,7 +25,7 @@ i = 0
 empty = True
 rectab = np.array([[0 for _ in range(28)] for _ in range(28)])
 while not done:
-    p.draw.rect(s,(0,0,0),p.Rect(0,0,700,700))
+    # p.draw.rect(s,(0,0,0),p.Rect(0,0,700,700))
     for event in p.event.get():
         if event.type == p.QUIT:
             done = True
@@ -36,7 +36,7 @@ while not done:
             color = (col,col,col)
             dx = x_n*25
             dy = y_n*25
-            p.draw.rect(s,color,p.Rect(dx+1,dy+1,23,23))
+            p.draw.rect(s,color,p.Rect(dx+1,dy+1,25,25))
     p.draw.rect(s,(150,150,150),p.Rect(760,50,100,50))
     if p.mouse.get_pressed()[0]:
         # reset
