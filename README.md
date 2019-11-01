@@ -1,2 +1,2 @@
 # mnist_paint
-Mnist model + paint-like recognizer
+Mnist model with a drawing application demo 
