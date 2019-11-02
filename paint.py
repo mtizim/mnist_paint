@@ -3,6 +3,58 @@ import itertools
 import tensorflow.keras
 import numpy as np
 
+
+mode = ["mnist","emnist"][0]
+
+id_to_asci={0: 48,
+ 1: 49,
+ 2: 50,
+ 3: 51,
+ 4: 52,
+ 5: 53,
+ 6: 54,
+ 7: 55,
+ 8: 56,
+ 9: 57,
+ 10: 65,
+ 11: 66,
+ 12: 67,
+ 13: 68,
+ 14: 69,
+ 15: 70,
+ 16: 71,
+ 17: 72,
+ 18: 73,
+ 19: 74,
+ 20: 75,
+ 21: 76,
+ 22: 77,
+ 23: 78,
+ 24: 79,
+ 25: 80,
+ 26: 81,
+ 27: 82,
+ 28: 83,
+ 29: 84,
+ 30: 85,
+ 31: 86,
+ 32: 87,
+ 33: 88,
+ 34: 89,
+ 35: 90,
+ 36: 97,
+ 37: 98,
+ 38: 100,
+ 39: 101,
+ 40: 102,
+ 41: 103,
+ 42: 104,
+ 43: 110,
+ 44: 113,
+ 45: 114,
+ 46: 116}
+
+
 import matplotlib as mpl
 mpl.use("Agg")
 
@@ -14,7 +66,7 @@ clock = p.time.Clock()
 p.font.init()
 f = p.font.Font(p.font.get_default_font(),30)
 f1 = p.font.Font(p.font.get_default_font(),7)
-model = tensorflow.keras.models.load_model("modelfile")
+model = tensorflow.keras.models.load_model("modelfile_"+mode)
 # 25x25 na piksel
 p.init()
 
@@ -37,11 +89,10 @@ while not done:
             dx = x_n*25
             dy = y_n*25
             p.draw.rect(s,color,p.Rect(dx+1,dy+1,25,25))
-    p.draw.rect(s,(150,150,150),p.Rect(760,50,100,50))
     if p.mouse.get_pressed()[0]:
         # reset
         x,y = p.mouse.get_pos()
-        if 760<x<860 and 50<y<150:
+        if 1300<x<1400 and 0<y<50:
             empty = True
             rectab = np.array([[0 for _ in range(28)] for _ in range(28)])
         if 0<x<700:
@@ -67,34 +118,47 @@ while not done:
             pred = model.predict(x=np.reshape(rectab,(1,28,28,1)))[0]
             v = np.argmax(pred)
         else:
-            pred = [0] * 10
+            if mode=="mnist":
+                pred = [0] * 10 # dla mnista
+            if mode=="emnist":
+                pred = [0] * 47
             v = -1
-        # fig = pylab.figure(figsize=[4, 4], dpi=100)
-        fig = mpl.pyplot.bar([i for i in range(10)],pred)
 
         barx = 700
-        bary = 600
         barw = 60
         bars = 10
         barc = (255,255,255)
         barvc = (20,200,20)
         valscale = 100
         barts = 20
-        a = p.Surface((700,350))
+        rowd = 100
+        if mode =="mnist":
+            rows = 1
+            bary = 500
+        if mode == "emnist":
+            rows = 5
+            bary = 150
+        a = p.Surface((700,700))
         a.set_alpha(50)
         a.fill((0,0,0))
-        s.blit(a,(700,350))
-        # p.draw.rect(s,(0,0,0,20),p.Rect(700,350,700,700))
-        for i,val in zip(range(10),pred):
-            valscaled = val * valscale
-            p.draw.rect(s,barc,p.Rect(barx+i*(barw+bars),bary-valscaled,barw,valscaled))
-            pos = ((barx+i*(barw+bars) + barw/2),bary+barts)
-            s.blit(f.render(str(i),False,barvc if i == v else barc),pos)
+        s.blit(a,(700,0))
+        i = 0
+        for rownum in range(rows):
+            for col in range(len(pred)//rows+1):
+                if i>len(pred)-1:
+                    break
+                val = pred[i]
+                valscaled = val * valscale
+                p.draw.rect(s,barc,p.Rect(barx+col*(barw+bars),bary-valscaled+rownum*rowd,barw,valscaled))
+                pos = ((barx+col*(barw+bars) + barw/2),bary+barts+rownum*rowd)
+                if mode =="mnist":
+                    s.blit(f.render(str(i),False,barvc if i == v else barc),pos) #dla mnista
+                if mode =="emnist":
+                    s.blit(f.render(chr(id_to_asci[i]),False,barvc if i == v else barc),pos) #dla emnista
+                i = i + 1
 
-
+    p.draw.rect(s,(150,150,150),p.Rect(1300,0,100,50))
     i = (i + 1)%20
-    # s.blit(f.render(str(pred),False,(255,255,255)),(0,17))
-    # s.blit(f.render(str([f"{el}.0" for el in range(10)]),False,(255,255,255)),(0,54))
 
 
     p.display.flip()
